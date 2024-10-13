@@ -1,0 +1,24 @@
+{
+  "name": "unco_drill",
+  "version": "1.0.0",
+  "description": "bbs app created by choran.",
+  "main": "./src/index.ts",
+  "scripts": {
+    "start": "nodemon --watch src --ext ts --exec \"npx ts-node src/app.ts\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ちょらん",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^5.20.0",
+    "express": "^4.21.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.7.5",
+    "nodemon": "^3.1.7",
+    "prisma": "^5.20.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  }
+}

@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./infra/nodejs/Dockerfile
+    ports:
+      - '3000:3000'
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      - DB_HOST=mysql
+      - DB_USER=uncodrill
+      - DB_PASSWORD=uncopass
+      - DB_NAME=unco_drill_db
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: unco_drill_db
+      MYSQL_USER: uncodrill
+      MYSQL_PASSWORD: uncopass
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./infra/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./infra/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - '3306:3306'
+
+volumes:
+  mysql_data:
