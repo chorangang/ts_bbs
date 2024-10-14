@@ -1,53 +1,65 @@
 import { indexParams, Thread } from "../../utils/types";
 import { threadMapper } from "../dto/threadMapper";
 import { newThread } from "../../domain/entity/thread";
-import {
-    insertThread,
-    selectThread,
-    selectThreads,
-    updateThread,
-    deleteThread,
-} from '../../adapters/repository/threadRepository';
 import { appError } from "../../utils/appError";
+import { threadRepository } from '../../adapters/repository/threadRepository';
 
-export const getThread = async (id: number) => {
-    return threadMapper(await selectThread(id));
-}
+export const createThreadUsecase = () => {
+	const { selectThread, selectThreads, insertThread, updateThread, deleteThread } = threadRepository();
 
-export const getThreads = async (params: indexParams) => {
+  const getThread = async (id: number) => {
+    const thread = await selectThread(id);
+
+    if (!thread) {
+      throw new appError(404, "Thread not found");
+    }
+
+    return threadMapper(thread);
+  };
+
+  const getThreads = async (params: indexParams) => {
     const result = await selectThreads(params);
 
-    // Threadが取得できなかった場合はnullを返す
-    if (!result) throw new appError(404, "Threads not found");
+    if (!result || result.length === 0) {
+      throw new appError(404, "Threads not found");
+    }
 
     return result.map((thread: any) => threadMapper(thread));
-};
+  };
 
-export const createThread = async (user_id: number, title: string, body: string) => {
+  const createThread = async (user_id: number, title: string, body: string) => {
     const thread = newThread(null, user_id, title, body);
+    await insertThread(thread.user_id, thread.title, thread.body);
+  };
 
-    const result = await insertThread(thread.user_id, thread.title, thread.body);
+  const editThread = async (id: number, title: string, body: string): Promise<void> => {
+		const selected: Thread|null = threadMapper(await selectThread(id));
 
-    return result;
-}
+		if (!selected) {
+      throw new appError(404, "Thread not found");
+    }
 
-export const editThread = async (id: number, title: string, body: string) => {
-    const selected: Thread|null = threadMapper(await selectThread(id));
+		const thread = newThread(
+				selected.id,
+				selected.user_id,
+				title,
+				body,
+				selected.created_at,
+				new Date().toISOString()
+		);
 
-    // Threadが取得できなかった場合はエラーメッセージを返す
-    if (!selected) throw new appError(404, 'Thread not found');
+    await updateThread(id, thread.title, thread.body, thread.updated_at);
+  };
 
-    // updated_atはデフォルトでNowになるので設定しない
-    const thread = newThread(selected.id, selected.user_id, title, body, selected.created_at);
+  const destroyThread = async (id: number): Promise<void> => {
+    await deleteThread(id);
+  };
 
-    const result = await updateThread(thread.user_id, thread.title, thread.body);
-
-    return result;
-
-}
-
-export const destroyThread = async (id: number) => {
-    const result = await deleteThread(id);
-
-    return result;
-}
+  return {
+    getThread,
+    getThreads,
+    createThread,
+    editThread,
+    destroyThread,
+  };
+};
