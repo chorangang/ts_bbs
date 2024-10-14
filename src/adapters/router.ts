@@ -1,25 +1,31 @@
 import express from "express";
-import {show, index, create, edit, destroy} from "./controllers/threadController";
+import { createThreadController } from "./controllers/threadController";
+import { createAuthController } from "./controllers/authController";
+import { userController } from "./controllers/userController";
 
 const router = express.Router();
 
+
 // /* Authentication Routes */
-// router.post("/api/register", register);
-// router.post("/api/login", login);
-// router.post("/api/logout", logout);
+const { register, login, logout } = createAuthController();
+router.post("/register", register);
+router.post("/login", login);
+router.post("/logout", logout);
 
 // /* User Routes */
-// router.get("/api/user", getUser);
-// router.get("/api/users", getUsers);
-// router.put("/api/users/:id", updateUser);
-// router.delete("/api/users/:id", deleteUser);
+const { showUser, indexUser, putUser, removeUser } = userController();
+router.get("/user", showUser);
+router.get("/users", indexUser);
+router.put("/users/:id", putUser);
+router.delete("/users/:id", removeUser);
 
 // /* Thread Routes */
-router.get("/threads/:id", show);
-router.get("/threads", index);
-router.post("/threads", create);
-router.patch("/threads/:id", edit);
-router.delete("/threads/:id", destroy);
+const { showThread, indexThread, saveThread, putThread, removeThread } = createThreadController();
+router.get("/threads/:id", showThread);
+router.get("/threads", indexThread);
+router.post("/threads", saveThread);
+router.patch("/threads/:id", putThread);
+router.delete("/threads/:id", removeThread);
 
 // /* Comment Routes */
 // router.get("/api/comments/:id", getComment);
